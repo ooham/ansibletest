@@ -1,1 +1,21 @@
+---
+- hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Remove JBOSS Log Files that are older than 15 days
+    find:
+      paths: "/var/log" 
+      patterns: "*.log.new"
+      age: "{{number_of_days}}"
+      recurse: yes
+    register: files_to_delete
+  - debug:
+      var: files_to_delete.files
+  - name: remove older than 15 days
+    file:
+      path: "{{ item.path }}" 
+      state: absent
+    with_items: 
+    - "{{files_to_delete.files}}"
 
